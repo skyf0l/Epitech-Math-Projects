@@ -1,0 +1,87 @@
+#!/usr/bin/env python3
+
+##
+## EPITECH PROJECT, 2021
+## 302separation
+## File description:
+## graph
+##
+
+import sys
+
+import graph
+
+
+def get_raw_data(filepath) -> list:
+    with open(filepath, "r") as f:
+        result = []
+        raw_lines = f.read().split("\n")
+        for i in range(len(raw_lines)):
+            if " is friends with " in raw_lines[i]:
+                result.append([y.strip() for y in raw_lines[i].split(" is friends with ")])
+            elif raw_lines[i] != "":
+                raise Exception("Invalid file format")
+        return result
+
+
+def get_sorted_names(raw_data: list) -> list:
+    result = []
+    for i in raw_data:
+        for y in i:
+            if y not in result:
+                result.append(y)
+    result.sort()
+    return result
+
+
+def create_graph(sorted: list, raw_data: list) -> graph.Graph:
+    g = graph.Graph(len(sorted))
+    for i in raw_data:
+        g.add_edge(sorted.index(i[0]), sorted.index(i[1]))
+    return g
+
+
+def print_usage() -> None:
+    print("USAGE")
+    print("\t./302separation file [n | p1 p2]")
+    print("DESCRIPTION")
+    print("\tfile\tfile that contains the list of Facebook connections")
+    print("\tn\tmaximum length of the paths")
+    print("\tpi\tname of someone on the file")
+
+
+if __name__ == "__main__":
+    if len(sys.argv) == 2 and sys.argv[1] == "-h":
+        print_usage()
+    elif len(sys.argv) == 3:
+        try:
+            if int(sys.argv[2]) < 1:
+                sys.exit(84)
+        except ValueError:
+            sys.exit(84)
+        try:
+            raw_data = get_raw_data(sys.argv[1])
+        except Exception:
+            sys.exit(84)
+        sorted = get_sorted_names(raw_data)
+        for i in sorted:
+            print(i)
+        print()
+        g = create_graph(sorted, raw_data)
+        g.gen_matrix()
+        print(g)
+        print()
+        g.gen_distances(int(sys.argv[2]))
+        print(g)
+    elif len(sys.argv) == 4:
+        raw_data = get_raw_data(sys.argv[1])
+        sorted = get_sorted_names(raw_data)
+        result = -1
+        if sys.argv[2] in sorted and sys.argv[3] in sorted:
+            g = create_graph(sorted, raw_data)
+            g.gen_matrix()
+            g.gen_distances(g.size + 1)
+            result = g.matrix[sorted.index(sys.argv[2])][sorted.index(sys.argv[3])]
+        print(f"Degree of separation between {sys.argv[2]} and {sys.argv[3]}: {result}")
+    else:
+        sys.exit(84)

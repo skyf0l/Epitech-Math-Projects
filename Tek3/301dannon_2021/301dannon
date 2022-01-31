@@ -1,0 +1,59 @@
+#!/usr/bin/env python3
+
+import sys
+import sort
+import copy
+
+
+def get_numbers_from_file(filepath: str) -> list:
+    with open(filepath) as f:
+        return [float(i) for i in f.read().split()]
+
+
+def get_sort_data(sort_function, numbers: list) -> int:
+    return sort_function(lambda a, b: a < b, numbers)
+
+
+def get_data(numbers: list) -> list:
+    data = []
+    data.append(get_sort_data(sort.selection_sort, copy.deepcopy(numbers)))
+    data.append(get_sort_data(sort.insertion_sort, copy.deepcopy(numbers)))
+    data.append(get_sort_data(sort.bubble_sort, copy.deepcopy(numbers)))
+    data.append(get_sort_data(sort.quick_sort, copy.deepcopy(numbers)))
+    data.append(get_sort_data(sort.merge_sort, copy.deepcopy(numbers)))
+    return data
+
+
+def print_data(number_elem: int, data: list) -> None:
+    if number_elem == 1:
+        print(f"1 element")
+    else:
+        print(f"{number_elem} elements")
+    print(f"Selection sort: {data[0]} comparison{'s' if data[0] != 1 else ''}")
+    print(f"Insertion sort: {data[1]} comparison{'s' if data[1] != 1 else ''}")
+    print(f"Bubble sort: {data[2]} comparison{'s' if data[2] != 1 else ''}")
+    print(f"Quicksort: {data[3]} comparison{'s' if data[3] != 1 else ''}")
+    print(f"Merge sort: {data[4]} comparison{'s' if data[4] != 1 else ''}")
+
+
+def print_usage():
+    print("USAGE")
+    print("\t./301dannon file")
+    print("DESCRIPTION")
+    print("\tfile\tfile that contains the numbers to be sorted, separated by spaces")
+
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        sys.exit(84)
+    if sys.argv[1] == "-h":
+        print_usage()
+    else:
+        try:
+            numbers = get_numbers_from_file(sys.argv[1])
+            data = get_data(numbers)
+        except:
+            sys.exit(84)
+        if len(numbers) == 0:
+            sys.exit(84)
+        print_data(len(numbers), data)

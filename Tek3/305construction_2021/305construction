@@ -1,0 +1,138 @@
+#!/usr/bin/env python3
+
+import sys
+import csv
+
+
+class TaskAlreadyExists(Exception):
+    pass
+
+
+class Task:
+    def __init__(self, name: str, desc: str, time: str, *deps: list[str]) -> None:
+        self.name = name
+        self.desc = desc
+        self.time = int(time)
+        self.deps = deps
+
+        self.start = 0
+        self.leniance = 0
+
+    def gen_data(self, tasks: dict[str, super]) -> None:
+        for dep in self.deps:
+            tasks[dep].gen_data(tasks)
+            if tasks[dep].start + tasks[dep].time > self.start:
+                self.start = tasks[dep].start + tasks[dep].time
+
+    def __str__(self) -> str:
+        return f"{self.name}\t({self.leniance})\t{' ' * self.start}{'=' * self.time}"
+
+    def __repr__(self) -> str:
+        return f"{self.start}-{self.leniance}"
+
+
+class Graph:
+    def __init__(self) -> None:
+        self.task_list: dict[str, Task] = {}
+
+        self.total_time = 0
+
+    def gen_graph(self) -> None:
+        # Generate the data for all the tasks
+        for task in self.task_list.values():
+            task.gen_data(self.task_list)
+
+        # Calculate total time of the Gantt graph
+        last_task = max([x for x in self.task_list.values()],
+                        key=lambda x: x.start + x.time)
+        self.total_time = last_task.start + last_task.time
+
+        # Generate the lenianeces of the tasks
+        for task in self.task_list.values():
+            starts: list[int] = []
+            next_start: int = 0
+            for second_task in self.task_list.values():
+                if task.name in second_task.deps:
+                    starts.append(second_task.start)
+            if len(starts) == 0:
+                next_start = self.total_time
+            else:
+                next_start = min(starts)
+            task.leniance = next_start - task.start - task.time
+
+    def add_task(self, task: Task) -> None:
+        if task.name in self.task_list:
+            raise TaskAlreadyExists(f"Task {task.name} already exists")
+        self.task_list[task.name] = task
+
+    def check_data(self) -> bool:
+        for task in self.task_list.values():
+            for dep in task.deps:
+                if dep not in self.task_list:
+                    return False
+        return True
+
+    def __str__(self) -> str:
+        tmp_list = [x for x in self.task_list.values()]
+        tmp_list.sort(key=lambda x: x.time)
+        tmp_list.sort(key=lambda x: x.start)
+        final_str = ""
+
+        final_str = f"Total duration of construction: {self.total_time} week{'s' if self.total_time != 1 else ''}\n\n"
+        for task in tmp_list:
+            if task.leniance == 0:
+                final_str += f"{task.name} must begin at t={task.start}\n"
+            else:
+                final_str += f"{task.name} must begin between t={task.start} or t={task.start + task.leniance}\n"
+
+        final_str += "\n"
+
+        for task in tmp_list:
+            final_str += str(task) + "\n"
+        return final_str
+
+
+def usage(executable: str) -> None:
+    print("USAGE")
+    print(f"\t{executable} file\n")
+    print("DESCRIPTION")
+    print("\tfile\tfile describing the tasks")
+
+
+def main(argv: list[str]) -> int:
+    if len(argv) != 2:
+        sys.exit(84)
+    if argv[1] == "-h" or argv[1] == "--help":
+        usage(argv[0])
+        sys.exit(0)
+    data: list[list[str]] = []
+    try:
+        with open(argv[1], "r") as f:
+            reader: csv.reader = csv.reader(f, delimiter=";")
+            for row in reader:
+                data.append(row)
+    except FileNotFoundError:
+        sys.exit(84)
+
+    # Error handling time
+    if len(data) == 0:
+        sys.exit(84)
+    for row in data:
+        if len(row) < 3:
+            sys.exit(84)
+
+    # Create the graph
+    g: Graph = Graph()
+    for task in [Task(*row) for row in data]:
+        try:
+            g.add_task(task)
+        except TaskAlreadyExists:
+            sys.exit(84)
+    if not g.check_data():
+        sys.exit(84)
+    g.gen_graph()
+    print(g, end="")
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))
