@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [ "$1" == "-h" ]; then
+    if [ ! -f bf ]; then
+        (cd brainfuck && make) > build.log
+    else
+        (cd brainfuck && make re) > build.log
+    fi
+    bf_code=`cat bonus/print_help.bf`
+    ./brainfuck/./bf "$bf_code" ""
+    (cd brainfuck && make fclean) > build.log
+    rm -f build.log
+    exit 0
+fi
+
+php 103cipher.php "$1" "$2" $3
