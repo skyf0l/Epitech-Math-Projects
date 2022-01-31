@@ -1,0 +1,134 @@
+#!/usr/bin/env python3
+
+from sys import argv
+import csv
+import math
+
+def helper():
+    print("USAGE")
+    print("\t./207demography code [...]")
+    print()
+    print("DESCRIPTION")
+    print("\tcode\tcountry code")
+
+def arg_manager():
+    if "-h" in argv:
+        helper()
+        exit(0)
+    if len(argv) == 1:
+        exit(84)
+
+def get_csv():
+    data = []
+    with open('207demography_data.csv', 'r') as csv_file:
+        reader = csv.reader(csv_file, delimiter=';')
+
+        for row in reader:
+            data.append(row)
+    return data
+
+def gather_years(data):
+    years = []
+    sum_years = 0
+    sqr_years = 0
+
+    for i in data[0][2:]:
+        years.append(int(i))
+    for i in years:
+        sum_years += i
+        sqr_years += i ** 2
+    return years, sum_years, sqr_years
+
+def request_contries(data):
+    countries = []
+
+    for i in argv[1:]:
+        for y in data:
+            if (y[1] == i):
+                countries.append(y)
+    if len(countries) != len(argv[1:]):
+        exit(84)
+    return countries
+
+def getXY(pop, years):
+    xy = 0
+
+    for i in range(len(pop)):
+        xy += pop[i] * years[i]
+    return xy
+
+def get_pop(requests):
+    pop = []
+    sum_pop = 0
+    sqr_pop = 0
+
+    for i in range(2, len(requests[0])):
+        pop.append(0)
+    for request in requests:
+        x = 0
+        for population in range(2, len(request)):
+            pop[x] += (int(request[population]))
+            x += 1
+    for i in pop:
+        sum_pop += i
+        sqr_pop += i ** 2
+    return pop, sum_pop, sqr_pop
+
+def print_countries(request):
+    print("Country: ", end="")
+    for i in range (len(request)):
+        print(request[i][0], end="")
+        if i != len(request) - 1:
+            print(", ", end="")
+    print("")
+
+def print_fit_1(pop, sum_pop, sqr_pop, years, sum_years, sqr_years, xy):
+    a = (len(years) * xy - sum_pop * sum_years) / (len(years) * sqr_years - sum_years ** 2)
+    b = (sum_pop * sqr_years - sum_years * xy) / (len(years) * sqr_years - sum_years ** 2)
+
+    mean = 0
+
+    print("Fit1")
+    if (b >= 0):
+        print(f"\tY = {a / 1000000:.2f} X + {b / 1000000:.2f}")
+    else:
+        print(f"\tY = {a / 1000000:.2f} X - {abs(b / 1000000):.2f}")
+    for i in range(len(pop)):
+        mean += ((years[i] * a + b) - pop[i]) ** 2 / len(pop)
+    print(f"\tRoot-mean-square deviation: {math.sqrt(mean) / 1000000:.2f}")
+    print(f"\tPopulation in 2050: {(2050 * a + b) / 1000000:.2f}")
+
+def print_fit_2(pop, sum_pop, sqr_pop, years, sum_years, sqr_years, xy):
+    a = (len(pop) * xy - sum_pop * sum_years) / (len(pop) * sqr_pop - sum_pop ** 2)
+    b = (sum_years * sqr_pop - sum_pop * xy) / (len(pop) * sqr_pop - sum_pop ** 2)
+
+    mean = 0
+
+    print("Fit2")
+    if (b >= 0):
+        print(f"\tY = {a * 1000000:.2f} X + {b:.2f}")
+    else:
+        print(f"\tY = {a * 1000000:.2f} X - {abs(b):.2f}")
+    for i in range(len(pop)):
+        mean += ((years[i] - b) / a - pop[i]) ** 2 / len(pop)
+    print(f"\tRoot-mean-square deviation: {math.sqrt(mean) / 1000000:.2f}")
+    print(f"\tPopulation in 2050: {((2050 - b) / a) / 1000000:.2f}")
+
+def print_correlation(pop, xy, sum_years, sum_pop, years, sqr_years, sqr_pop):
+    correlation = (len(pop) * xy) - (sum_years * sum_pop)
+    print(f"Correlation: {correlation / math.sqrt((len(years) * sqr_years - sum_years ** 2) * (len(pop) * sqr_pop - sum_pop ** 2)):.4f}")
+
+def main():
+    arg_manager()
+    csv = get_csv()
+    request = request_contries(csv)
+    pop, sum_pop, sqr_pop = get_pop(request)
+    years, sum_years, sqr_years = gather_years(csv)
+    xy = getXY(pop, years)
+    print_countries(request)
+    print_fit_1(pop, sum_pop, sqr_pop, years, sum_years, sqr_years, xy)
+    print_fit_2(pop, sum_pop, sqr_pop, years, sum_years, sqr_years, xy)
+    print_correlation(pop, xy, sum_years, sum_pop, years, sqr_years, sqr_pop)
+
+if __name__ == "__main__":
+    main()

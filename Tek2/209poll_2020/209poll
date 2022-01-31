@@ -1,0 +1,76 @@
+#!/usr/bin/env python3
+
+import sys
+from math import sqrt
+
+class Data:
+    _pSize = 0
+    _sSize = 0
+    _p = 0.0
+
+    _variance = 0
+    _intervals = [[],[]]
+
+    def __init__(self, pSize: int, sSize: int, p: float) -> None:
+        self._pSize = pSize
+        self._sSize = sSize
+        self._p = p
+
+    def compute(self) -> None:
+        self._variance = (((self._p * (100 - self._p)) / 10000) / self._sSize) * ((self._pSize - self._sSize) / (self._pSize - 1))
+
+        amplitude = 196 * sqrt(self._variance)
+        self._intervals[0].append(0.0 if self._p - amplitude < 0 else self._p - amplitude)
+        self._intervals[0].append(100 if self._p + amplitude > 100 else self._p + amplitude)
+
+        amplitude = 258 * sqrt(self._variance)
+        self._intervals[1].append(0.0 if self._p - amplitude < 0 else self._p - amplitude)
+        self._intervals[1].append(100.0 if self._p + amplitude > 100 else self._p + amplitude)
+
+    def print_result(self) -> None:
+        print(f"Population size:\t {self._pSize}\n"
+            f"Sample size:\t\t {self._sSize}\n"
+            f"Voting intentions:\t {self._p}%\n"
+            f"Variance:\t\t {self._variance:.6f}\n"
+            f"95% confidence interval: [{self._intervals[0][0]:.2f}%; {self._intervals[0][1]:.2f}%]\n"
+            f"99% confidence interval: [{self._intervals[1][0]:.2f}%; {self._intervals[1][1]:.2f}%]")
+
+def print_usage() -> None:
+    print("USAGE\n"
+        "\t./209poll pSize sSize p\n"
+        "\nDESCRIPTION\n"
+        "\tpSize\tsize of the population\n"
+        "\tsSize\tsize of the sample (supposed to be representative)\n"
+        "\tp\tpercentage of voting intentions for a specific candidate")
+
+
+def main(argc: int, argv: list) -> int:
+    if "-h" in argv:
+        print_usage()
+        return 0
+    if argc != 4:
+        print_usage()
+        return 84
+
+    pSize = 0
+    sSize = 0
+    p = 0.0
+    try:
+        pSize = int(argv[1])
+        sSize = int(argv[2])
+        p = float(argv[3])
+    except ValueError:
+        print_usage()
+        return 84
+    if sSize > pSize or p < 0 or p > 100 or sSize <= 0:
+        print_usage()
+        return 84
+
+    data = Data(pSize, sSize, p)
+    data.compute()
+    data.print_result()
+    return 0
+
+
+if __name__ == "__main__":
+    exit(main(len(sys.argv), sys.argv))

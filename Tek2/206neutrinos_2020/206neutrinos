@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+
+from sys import argv, stdin
+from math import sqrt
+
+# "A smart program design will produce a compact and elegant code!"
+# yes i got it, don't tell me twice!
+
+'''
+$ ./206neutrinos 12000 297514 297912 4363
+Enter next value: 299042
+    Number of values:   12001
+    Standard deviation: 4362.84
+    Arithmetic mean:    297514.13
+    Root mean square:   297546.11
+    Harmonic mean:      297912.09
+
+Enter next value: 302420
+    Number of values:   12002
+    Standard deviation: 4362.89
+    Arithmetic mean:    297514.54
+    Root mean square:   297546.52
+    Harmonic mean:      297912.46
+
+Enter next value: END
+'''
+
+
+if '-h' in argv or '--help' in argv:
+    print('''USAGE\n\t./206neutrinos n a h sd\n\nDESCRIPTION\n\tn\tnumber of values\n\ta\tarithmetic mean\n\th\tharmonic means\n\td\tstandard deviation''')
+    exit()
+
+
+def process_next_value(nextValue, values):
+    n, a, h, sd = values
+
+    total = (sd ** 2 + a ** 2) * n
+
+    n += 1
+    a = ((n - 1) * a + nextValue) / n
+    h = n / ((1 / nextValue) + ((n - 1) / h))
+    sd = sqrt(((total + nextValue ** 2) / n) - a ** 2)
+
+    rs = sqrt((total + nextValue ** 2) / n)
+
+    print('\tNumber of values:\t%d' % n)
+    print('\tStandard deviation:\t%.2f' % sd)
+    print('\tArithmetic mean:\t%.2f' % a)
+    print('\tRoot mean square:\t%.2f' % rs)
+    print('\tHarmonic mean:\t%.2f' % h)
+    return n, a, h, sd
+
+
+try:
+    assert(len(argv) == 5)
+    n = int(argv[1])
+    assert(n >= 0)
+    a, h, sd = [float(arg) for arg in argv[2:5]]
+    values = n, a, h, sd
+except:
+    print('Error arg parsing')
+    exit(84)
+while True:
+    print('Enter next value: ', end='', flush=True)
+    line = stdin.readline().strip()
+    if len(line) == 0 or line == 'END':
+        exit(0)
+    try:
+        nextValue = int(line.strip())
+    except:
+        print('Error arg parsing')
+        exit(84)
+    values = process_next_value(nextValue, values)
+    print()

@@ -1,0 +1,3 @@
+#!/bin/bash
+php 204ducks.jpg $* | grep -v '#'
+exit ${PIPESTATUS[0]}

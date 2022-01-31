@@ -1,0 +1,132 @@
+#!/usr/bin/env python3
+
+from sys import argv
+from math import factorial
+
+
+FIT_TABLE = [
+    [0.00, 0.02, 0.06, 0.15, 0.27, 0.45, 0.71, 1.07, 1.64, 2.71, 3.84, 5.41, 6.63],
+    [0.02, 0.21, 0.45, 0.71, 1.02, 1.39, 1.83, 2.41, 3.22, 4.61, 5.99, 7.82, 9.21],
+    [0.11, 0.58, 1.01, 1.42, 1.87, 2.37, 2.95, 3.66, 4.64, 6.25, 7.81, 9.84, 11.34],
+    [0.30, 1.06, 1.65, 2.19, 2.75, 3.36, 4.04, 4.88, 5.99, 7.78, 9.49, 11.67, 13.28],
+    [0.55, 1.61, 2.34, 3.00, 3.66, 4.35, 5.13, 6.06, 7.29, 9.24, 11.07, 13.39, 15.09],
+    [0.87, 2.20, 3.07, 3.83, 4.57, 5.35, 6.21, 7.23, 8.56, 10.64, 12.59, 15.03, 16.81],
+    [1.24, 2.83, 3.82, 4.67, 5.49, 6.35, 7.28, 8.38, 9.80, 12.02, 14.07, 16.62, 18.48],
+    [1.65, 3.49, 4.59, 5.53, 6.42, 7.34, 8.35, 9.52, 11.03, 13.36, 15.51, 18.17, 20.09],
+    [2.09, 4.17, 5.38, 6.39, 7.36, 8.34, 9.41, 10.66, 12.24, 14.68, 16.92, 19.68, 21.67],
+    [2.56, 4.87, 6.18, 7.27, 8.30, 9.34, 10.47, 11.78, 13.44, 15.99, 18.31, 21.16, 23.21]
+]
+FIT_VALUE = ['P > 99%', '90% < P < 99%', '80% < P < 90%', '70% < P < 80%', '60% < P < 70%', '50% < P < 60%', '40% < P < 50%', '30% < P < 40%', '20% < P < 30%', '10% < P < 20%', '5% < P < 10%', '2% < P < 5%', '1% < P < 2%', 'P < 1%']
+
+
+def print_help():
+    print('USAGE\n\t./208dowels O0 O1 O2 O3 O4 O5 O6 O7 O8\n\nDESCRIPTION\n\tOi\tsize of the observed class')
+    exit(0)
+
+
+def print_error(error):
+    print(f'208dowels: {error}')
+    print('Try \'./208dowels --help\' for more information.')
+    exit(84)
+
+
+# see 201yams LMAO
+def C(k, n):
+    return (factorial(n) / (factorial(k) * factorial(n - k)))
+
+
+# n -> Number of tries
+# x -> Number of desidered outcome
+# p -> Probability of desired outcome
+def binom(n, x, p):
+    return C(x, n) * (p ** x) * (1 - p) ** (n - x)
+
+
+def calcDistribution(values):
+    distribution = 0
+    for value, i in enumerate(values):
+        distribution += value * i
+    return distribution / 10000
+
+
+def calcTx(distribution):
+    Tx = []
+    for i in range(8):
+        Tx.append(100 * binom(100, i, distribution))
+    Tx.append(100 - sum(Tx))
+    return Tx
+
+
+def packed_values(Ox, Tx):
+    x = list(range(len(Ox)))
+    while not all([x >= 10 for x in Ox]):
+        _, id = min((v, id) for (id, v) in enumerate(Ox))
+        if id == 0:
+            x.pop(1)
+            Ox[0] += Ox.pop(1)
+            Tx[0] += Tx.pop(1)
+        elif id == len(Ox) - 1:
+            x.pop(id)
+            Ox[id - 1] += Ox.pop(id)
+            Tx[id - 1] += Tx.pop(id)
+        else:
+            if Ox[id - 1] <= Ox[id + 1]:
+                x.pop(id)
+                Ox[id - 1] += Ox.pop(id)
+                Tx[id - 1] += Tx.pop(id)
+            else:
+                x.pop(id + 1)
+                Ox[id + 1] += Ox[id]
+                Tx[id + 1] += Tx[id]
+                Ox.pop(id)
+                Tx.pop(id)
+    return x, Ox, Tx
+
+
+def calc_square(Ox, Tx):
+    chisquared = 0
+    for o, t in zip(Ox, Tx):
+        chisquared += (o - t) ** 2 / t
+    return chisquared
+
+
+def calc_fit_validity(chisquared, degreesOfFreedom):
+    for fit, value in zip(FIT_TABLE[degreesOfFreedom - 1], FIT_VALUE):
+        if fit > chisquared:
+            return value
+    return 'P < 1%'
+
+
+def my_wow_print(msg):
+    print(msg)
+    return my_wow_print
+
+
+def main(argv):
+    if '-h' in argv or '--help' in argv:
+        print_help()
+    if len(argv) != 9:
+        print_error(f'{len(argv)} arguments given but 9 expected')
+    try:
+        Ox = [int(arg) for arg in argv]
+    except:
+        print_error('wrong argument: parsing error')
+    if not all([o >= 0 for o in Ox]):
+        print_error('Ox must be positive')
+    if sum(Ox) != 100:
+        print_error('Ox sum must be equal to 100')
+
+    distribution = calcDistribution(Ox)
+    Tx = calcTx(distribution)
+    x, Ox, Tx = packed_values(Ox, Tx)
+
+    chisquared = calc_square(Ox, Tx)
+    degreesOfFreedom = len(Ox) - 2
+    fitValidity = calc_fit_validity(chisquared, degreesOfFreedom)
+
+    my_wow_print(
+        '\n'.join([f'{_}{__}' for _, __ in zip([f'{"x":^5}  ', ' Ox    ', ' Tx    '], [_(__) for _, __ in zip([lambda x: f'{"".join([f"| {x:<6}" for x in x])}| Total', lambda x: f'{"".join([f"| {x:<6}" for x in x])}| {sum(Ox)}', lambda x: f'{"".join([f"| {x:<6.1f}" for x in x])}| {int(sum(Tx))}'], [[f"{x[_]}+" if (_+1) == len(x) else f"{x[_]}-{x[_+1]-1}"if x[_] - x[_+1] < -1 else x[_] for _ in range(len(x))], Ox, Tx])])]))('\n'.join([_.format(__) for _, __ in zip(['Distribution:\t\tB(100, {:.4f})', 'Chi-squared:\t\t{:.3f}', 'Degrees of freedom:\t{}', 'Fit validity:\t\t{}'], [distribution, chisquared, degreesOfFreedom, fitValidity])]))
+
+
+if __name__ == '__main__':
+    main(argv[1:])
