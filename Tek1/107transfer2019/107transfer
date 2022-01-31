@@ -1,2 +1,0 @@
-#!/bin/bash
-php 107transfer.php $*
