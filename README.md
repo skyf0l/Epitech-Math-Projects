@@ -1,6 +1,7 @@
 # Epitech-Math-Projects
 
-Collection of Epitech Math Projects
+### Collection of Epitech Math Projects
+### By [Skyf0l](https://github.com/skyf0l) and [Huntears](https://github.com/huntears/)
 
 # Tek1
 
