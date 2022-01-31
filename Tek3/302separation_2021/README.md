@@ -1,5 +1,7 @@
 # 302separation | Epitech Maths Project
 
+Subject: [302separation.pdf](/Subjects/302separation.pdf)
+
 ## Tests
 
 | Category | Percentage | Tests |

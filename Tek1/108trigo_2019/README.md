@@ -1,5 +1,7 @@
 # 108trigo | Epitech Maths Project
 
+Subject: [108trigo.pdf](/Subjects/108trigo.pdf)
+
 ## Tests
 
 | Category | Percentage | Tests |

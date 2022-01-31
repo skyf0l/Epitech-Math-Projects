@@ -1,5 +1,7 @@
 # 304pacman | Epitech Maths Project
 
+Subject: [304pacman.pdf](/Subjects/304pacman.pdf)
+
 ## Tests
 
 | Category | Percentage | Tests |

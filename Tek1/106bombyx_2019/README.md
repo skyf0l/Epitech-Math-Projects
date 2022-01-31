@@ -1,5 +1,7 @@
 # 106bombyx | Epitech Maths Project
 
+Subject: [106bombyx.pdf](/Subjects/106bombyx.pdf)
+
 ## Tests
 
 | Category | Percentage | Tests |
