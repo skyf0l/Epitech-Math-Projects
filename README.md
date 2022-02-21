@@ -38,4 +38,4 @@
 - [306radiator](Tek3/306radiator_2021/) (84.85%) - Plumbing and the Gauss Curve
 - [307multigrains](Tek3/307multigrains_2021/) (100.00%) - Multigrains and Dantzig’s Simplex Method
 - [308reedpipes](Tek3/308reedpipes_2021/) (100.00%) - Numerical Machine and Cubic Splines
-- [309pollution](Tek3/309pollution_2021/) (NA) - Extrapolation and Pollution
+- [309pollution](Tek3/309pollution_2021/) (97.96%) - Extrapolation and Pollution
