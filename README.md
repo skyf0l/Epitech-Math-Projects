@@ -19,9 +19,9 @@
 # Tek2
 
 - [201yams](Tek2/201yams_2020/) (85.23%) - Rolling dice like god
-- [202unsold](Tek2/202unsold_2020/) (56.41%) - Statistics for Selling Suit Stock
+- [202unsold](Tek2/202unsold_2020/) (56.41%) - Statistics for Selling Suit Stock **(weird source code)**
 - [203hotline](Tek2/203hotline_2020/) (93.33%) - Avoiding Overload
-- [204ducks](Tek2/204ducks_2020/) (86.36%) - Decamping Disturbed Ducks
+- [204ducks](Tek2/204ducks_2020/) (86.36%) - Decamping Disturbed Ducks **(weird source code)**
 - [205IQ](Tek2/205IQ_2020/) (97.50%) - Normativity and Normal Distribution
 - [206neutrinos](Tek2/206neutrinos_2020/) (87.50%) - No mean task here. . .
 - [207demography](Tek2/207demography_2020/) (14.29%) - Population and regression
